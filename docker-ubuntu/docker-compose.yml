@@ -1,0 +1,18 @@
+version: '3'
+services:
+  php-fpm:
+    build:
+      context: .
+    ports:
+      - 80:8080
+    environment:
+      APPD_ENABLE: 1
+      APPD_ACCOUNTNAME: "customer1"
+      APPD_ACCOUNTKEY: "3866de82-4b68-4efb-84d3-f5427d142a8e"
+      APPD_CONTROLLER: "10.61.133.33"
+      APPD_PORT: 8181
+      APPD_APP: "S1-prod"
+      APPD_TIER: "idp"
+      APPD_NODE: "test"
+    volumes:
+        - ./logs:/opt/appdynamics-php-agent-linux_x64/logs

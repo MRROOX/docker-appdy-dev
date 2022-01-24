@@ -1,0 +1,130 @@
+FROM alpine:3.13
+
+
+ENV glib-version=2.34
+
+RUN wget -q -O /etc/apk/keys/sgerrand.rsa.pub https://alpine-pkgs.sgerrand.com/sgerrand.rsa.pub && \
+  wget -q https://github.com/sgerrand/alpine-pkg-glibc/releases/download/2.34-r0/glibc-2.34-r0.apk && \
+  apk update && apk add gzip glibc-2.34-r0.apk && \
+  ln -sf /usr/glibc-compat/lib/ld-linux-x86-64.so.2 /usr/glibc-compat/lib/ld-linux-x86-64.so && \
+  ln -sf /usr/glibc-compat/lib/libBrokenLocale.so.1 /usr/glibc-compat/lib/libBrokenLocale.so && \
+  ln -sf /usr/glibc-compat/lib/libanl.so.1 /usr/glibc-compat/lib/libanl.so && \
+  ln -sf /usr/glibc-compat/lib/libc_malloc_debug.so.0 /usr/glibc-compat/lib/libc_malloc_debug.so && \
+  ln -sf /usr/glibc-compat/lib/libcrypt.so.1 /usr/glibc-compat/lib/libcrypt.so && \
+  ln -sf /usr/glibc-compat/lib/libdl.so.2 /usr/glibc-compat/lib/libdl.so && \
+  ln -sf /usr/glibc-compat/lib/libmvec.so.1 /usr/glibc-compat/lib/libmvec.so && \
+  ln -sf /usr/glibc-compat/lib/libnsl.so.1 /usr/glibc-compat/lib/libnsl.so && \
+  ln -sf /usr/glibc-compat/lib/libnss_compat.so.2 /usr/glibc-compat/lib/libnss_compat.so && \
+  ln -sf /usr/glibc-compat/lib/libnss_db.so.2 /usr/glibc-compat/lib/libnss_db.so && \
+  ln -sf /usr/glibc-compat/lib/libnss_dns.so.2 /usr/glibc-compat/lib/libnss_dns.so && \
+  ln -sf /usr/glibc-compat/lib/libnss_files.so.2 /usr/glibc-compat/lib/libnss_files.so && \
+  ln -sf /usr/glibc-compat/lib/libnss_hesiod.so.2 /usr/glibc-compat/lib/libnss_hesiod.so && \
+  ln -sf /usr/glibc-compat/lib/libpthread.so.0 /usr/glibc-compat/lib/libpthread.so && \
+  ln -sf /usr/glibc-compat/lib/libresolv.so.2 /usr/glibc-compat/lib/libresolv.so && \
+  ln -sf /usr/glibc-compat/lib/librt.so.1 /usr/glibc-compat/lib/librt.so && \
+  ln -sf /usr/glibc-compat/lib/libthread_db.so.1 /usr/glibc-compat/lib/libthread_db.so && \
+  ln -sf /usr/glibc-compat/lib/libutil.so.1 /usr/glibc-compat/lib/libutil.so && \
+  rm glibc-2.34-r0.apk && \
+  wget -q https://github.com/sgerrand/alpine-pkg-glibc/releases/download/2.34-r0/glibc-bin-2.34-r0.apk && \
+  apk add glibc-bin-2.34-r0.apk && \
+  rm glibc-bin-2.34-r0.apk && \
+  wget -q https://github.com/sgerrand/alpine-pkg-glibc/releases/download/2.34-r0/glibc-i18n-2.34-r0.apk && \
+  apk add glibc-i18n-2.34-r0.apk && \
+  rm glibc-i18n-2.34-r0.apk /etc/apk/keys/sgerrand.rsa.pub && \
+  gunzip --keep /usr/glibc-compat/share/i18n/charmaps/UTF-8.gz && \
+  /usr/glibc-compat/bin/localedef -i en_US -f UTF-8 en_US.UTF-8 && \
+  rm /usr/glibc-compat/share/i18n/charmaps/UTF-8 /var/cache/apk/* && \
+  apk del glibc-bin glibc-i18n gzip
+
+
+  RUN apk --no-cache add \
+  wget \
+  curl \
+  nginx \
+  php7 \
+  php7-ctype \
+  php7-curl \
+  php7-dom \
+  php7-fpm \
+  php7-gd \
+  php7-intl \
+  php7-json \
+  php7-mbstring \
+  php7-mysqli \
+  php7-opcache \
+  php7-openssl \
+  php7-phar \
+  php7-session \
+  php7-xml \
+  php7-xmlreader \
+  php7-zlib \
+  php7-tokenizer \
+  php7-pdo_pgsql \
+  php7-pgsql \
+  supervisor
+
+# RUN wget -q -O /etc/apk/keys/sgerrand.rsa.pub https://alpine-pkgs.sgerrand.com/sgerrand.rsa.pub
+# RUN wget https://github.com/sgerrand/alpine-pkg-glibc/releases/download/2.34-r0/glibc-2.34-r0.apk
+# RUN apk add glibc-2.34-r0.apk
+
+
+# RUN cp /lib64/ld-linux-x86-64.so.2 /lib/
+# RUN ls -l /lib/
+
+#RUN ldd
+
+RUN adduser --home /home/efx_container_user --gecos "" --disabled-password --uid 1000 efx_container_user && \
+  mkdir -p /home/efx_container_user/.m2 && \
+  chown efx_container_user:efx_container_user /home/efx_container_user -R && \
+  chmod 4444 /etc/ssl/certs/ca-certificates.crt && \
+  rm -rf /var/cache/apk
+
+# Create symlink so programs depending on `php` still function
+#RUN ln -s /usr/bin/php7 /usr/bin/php
+
+# Configure nginx
+COPY efx-image/nginx/nginx.conf /etc/nginx/nginx.conf
+
+# Configure PHP-FPM
+COPY efx-image/php/fpm-config.conf /etc/php7/php-fpm.d/www.conf
+COPY efx-image/php/php.ini /etc/php7/conf.d/config.ini
+
+# Configure supervisord
+COPY efx-image/supervisord/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
+RUN chown efx_container_user.efx_container_user /etc/supervisor/conf.d/supervisord.conf
+
+# Setup document root
+RUN mkdir -p /var/www/html
+
+# Make sure files/folders needed by the processes are accessable when they run under the efx_container_user user
+RUN chown -R efx_container_user.efx_container_user /var/www/html && \
+  chown -R efx_container_user.efx_container_user /run && \
+  chown -R efx_container_user.efx_container_user /var/lib/nginx && \
+  chown -R efx_container_user.efx_container_user /var/log/nginx
+
+# Switch to use a non-root user from here on
+
+
+# Add application
+WORKDIR /var/www/html
+COPY src/ /var/www/html/
+RUN chown efx_container_user.efx_container_user -R /var/www/html/
+
+# AppDynamics Integration
+ADD appdynamics-php-agent-linux_x64/appdynamics-php-agent-x64-linux-22.1.0.14.tar.bz2 /opt/
+RUN chown efx_container_user.efx_container_user -R /opt/appdynamics-php-agent-linux_x64/
+RUN chmod 755 -R /opt/appdynamics-php-agent-linux_x64/
+RUN chmod 777 /opt/appdynamics-php-agent-linux_x64/logs
+RUN ls -l /opt/appdynamics-php-agent-linux_x64/
+RUN chmod o+w /usr/lib/php7/modules
+RUN chmod o+w /etc/php7/conf.d
+ADD installAndStart.sh /usr/local/bin/installAndStart.sh
+RUN chown efx_container_user.efx_container_user /usr/local/bin/installAndStart.sh
+RUN chmod u+x /usr/local/bin/installAndStart.sh
+
+
+# Expose the port nginx is reachable on
+EXPOSE 8080
+USER efx_container_user
+
+ENTRYPOINT ["/usr/local/bin/installAndStart.sh"]
