@@ -19,26 +19,26 @@ RUN apk --no-cache add \
   wget \
   curl \
   nginx \
-  php8 \
-  php8-ctype \
-  php8-curl \
-  php8-dom \
-  php8-fpm \
-  php8-gd \
-  php8-intl \
-  php8-json \
-  php8-mbstring \
-  php8-mysqli \
-  php8-opcache \
-  php8-openssl \
-  php8-phar \
-  php8-session \
-  php8-xml \
-  php8-xmlreader \
-  php8-zlib \
-  php8-tokenizer \
-  php8-pdo_pgsql \
-  php8-pgsql \
+  php7 \
+  php7-ctype \
+  php7-curl \
+  php7-dom \
+  php7-fpm \
+  php7-gd \
+  php7-intl \
+  php7-json \
+  php7-mbstring \
+  php7-mysqli \
+  php7-opcache \
+  php7-openssl \
+  php7-phar \
+  php7-session \
+  php7-xml \
+  php7-xmlreader \
+  php7-zlib \
+  php7-tokenizer \
+  php7-pdo_pgsql \
+  php7-pgsql \
   supervisor
 
 # RUN wget -q -O /etc/apk/keys/sgerrand.rsa.pub https://alpine-pkgs.sgerrand.com/sgerrand.rsa.pub
@@ -59,14 +59,14 @@ RUN adduser --home /home/efx_container_user --gecos "" --disabled-password --uid
   rm -rf /var/cache/apk
 
 # Create symlink so programs depending on `php` still function
-#RUN ln -s /usr/bin/php8 /usr/bin/php
+#RUN ln -s /usr/bin/php7 /usr/bin/php
 
 # Configure nginx
 COPY efx-image/nginx/nginx.conf /etc/nginx/nginx.conf
 
 # Configure PHP-FPM
-COPY efx-image/php/fpm-config.conf /etc/php8/php-fpm.d/www.conf
-COPY efx-image/php/php.ini /etc/php8/conf.d/config.ini
+COPY efx-image/php/fpm-config.conf /etc/php7/php-fpm.d/www.conf
+COPY efx-image/php/php.ini /etc/php7/conf.d/config.ini
 
 # Configure supervisord
 COPY efx-image/supervisord/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
@@ -95,8 +95,8 @@ RUN chown efx_container_user.efx_container_user -R /opt/appdynamics-php-agent-li
 RUN chmod 755 -R /opt/appdynamics-php-agent-linux_x64/
 RUN chmod 777 /opt/appdynamics-php-agent-linux_x64/logs
 RUN ls -l /opt/appdynamics-php-agent-linux_x64/
-RUN chmod o+w /usr/lib/php8/modules
-RUN chmod o+w /etc/php8/conf.d
+RUN chmod o+w /usr/lib/php7/modules
+RUN chmod o+w /etc/php7/conf.d
 ADD installAndStart.sh /usr/local/bin/installAndStart.sh
 RUN chown efx_container_user.efx_container_user /usr/local/bin/installAndStart.sh
 RUN chmod u+x /usr/local/bin/installAndStart.sh
